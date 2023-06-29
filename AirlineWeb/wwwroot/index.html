@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.1/css/bootstrap.min.css"
+        integrity="sha384-WskhaSGFgHYWDcbwN70/dfYBj47jz9qbsMId/iRN3ewGhXQFZCSftd1LZCfmhktB" crossorigin="anonymous">
+    <title>Verde Aviação - Registro de Webhook </title>
+</head>
+
+<body>
+    <div class="container">
+        <h1 class="display-3 text-center my-4">Verde Aviação</h1>
+        <h3 class="display-5 text-center my-4">Registro de Webhook</h3>
+
+        <div id="alertSuccess" class="alert alert-success">
+            <strong>Sucesso</strong> <label id="successMessage">Webhook Registrado.</label>
+        </div>
+
+        <div id="alertDanger" class="alert alert-danger">
+            <strong>Erro</strong> <label id="dangerMessage">Por favor, verifique os logs.</label>
+        </div>
+
+        <div id="registration">
+            <div class="form-group">
+                <label for="webhook">Webhook URL</label>
+                <input class="form-control form-control-lg" type="text" id="webhook" placeholder="Insira URL">
+                <small class="form-text text-muted">Sua Webhook URL não será compartilhada.</small>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label for="webhooktype">Tipo de Webhook</label>
+            <select class="form-control" id="webhooktype">
+                <option value="priceChange">Mudança de Preço</option>
+                <option value="availability">Teste 2</option>
+                <option value="delays">Teste 3</option>
+            </select>
+        </div>
+
+        <div>
+            <button id="register" class="btn btn-success btn-block" type="submit">Registrar</button>
+        </div>
+
+    </div>
+</body>
+<script>
+    var registerButton = document.getElementById("register");
+    var webhookURL = document.getElementById("webhook");
+    var webhookType = document.getElementById("webhooktype");
+    var successBox = document.getElementById("alertSuccess");
+    var dangerBox = document.getElementById("alertDanger");
+    var dangerMessage = document.getElementById("dangerMessage");
+    var successMessage = document.getElementById("successMessage");
+
+    successBox.style.display = 'none';
+    dangerBox.style.display = 'none';
+
+    registerButton.onclick = function () {
+        successBox.style.display = 'none';
+        dangerBox.style.display = 'none';
+
+        if (webhookURL.value == "") {
+            dangerMessage.innerHTML = "Por favor, insira uma URL";
+            dangerBox.style.display = 'block';
+        }
+        else {
+            (async () => {
+                const rawResponse = await fetch('https://localhost:5001/api/WebhookSubscription', {
+                    method: 'post',
+                    body: JSON.stringify({ webhookURL: webhookURL.value, webhookType: webhookType.value }),
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                const content = await rawResponse.json();
+
+                successMessage.innerHTML = "Webhook registrado. Por favor, use o segredo: " + content.secret + " para validação.";
+                successBox.style.display = 'block';
+
+                console.log(content);
+            })();
+        }
+    };
+</script>
